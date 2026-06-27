@@ -129,7 +129,8 @@ jobs:
           chmod +x release-assets/install.sh
 
           # Create skills tarball
-          cd release-assets && tar -czf skills.tar.gz skills/ && rm -rf skills/
+          tar -czf release-assets/skills.tar.gz -C release-assets skills/
+          rm -rf release-assets/skills/
 
           echo "=== Release assets ==="
           ls -lh release-assets/
