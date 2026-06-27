@@ -1,0 +1,186 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 2.5.2)'
+        required: true
+        default: '2.5.2'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test -x javadoc
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+
+          # Copy fat jars with clean names
+          cp smali/build/libs/smali.jar release-assets/smali-${{ steps.version.outputs.version }}.jar
+          cp baksmali/build/libs/baksmali.jar release-assets/baksmali-${{ steps.version.outputs.version }}.jar
+
+          # Also create version-agnostic symlinks (copies on non-Windows)
+          cp smali/build/libs/smali.jar release-assets/smali.jar
+          cp baksmali/build/libs/baksmali.jar release-assets/baksmali.jar
+
+          # Copy dexlib2 jar (for programmatic use)
+          cp dexlib2/build/libs/dexlib2-*.jar release-assets/dexlib2.jar
+
+          # Copy util jar
+          cp util/build/libs/util-*.jar release-assets/util.jar
+
+          # Copy skills
+          cp -r .claude/skills release-assets/skills
+
+          # Create install script
+          cat > release-assets/install.sh << 'INSTALL_EOF'
+          #!/bin/bash
+          # smali-skills installer
+          # Usage: curl -fsSL https://github.com/android-security-engineer/smali-skills/releases/latest/download/install.sh | bash
+
+          set -e
+
+          VERSION="${1:-latest}"
+          INSTALL_DIR="${2:-$HOME/.local/share/smali-skills}"
+          SKILLS_DIR="${3:-$HOME/.claude/skills/smali-skills}"
+
+          echo "=== smali-skills installer ==="
+          echo "Version: $VERSION"
+          echo "Install dir: $INSTALL_DIR"
+          echo "Skills dir: $SKILLS_DIR"
+
+          # Determine download URL
+          if [ "$VERSION" = "latest" ]; then
+            BASE_URL="https://github.com/android-security-engineer/smali-skills/releases/latest/download"
+          else
+            BASE_URL="https://github.com/android-security-engineer/smali-skills/releases/download/v${VERSION}"
+          fi
+
+          # Create install directory
+          mkdir -p "$INSTALL_DIR"
+          mkdir -p "$SKILLS_DIR"
+
+          # Download jars
+          echo "Downloading smali.jar..."
+          curl -fsSL "$BASE_URL/smali.jar" -o "$INSTALL_DIR/smali.jar"
+          echo "Downloading baksmali.jar..."
+          curl -fsSL "$BASE_URL/baksmali.jar" -o "$INSTALL_DIR/baksmali.jar"
+          echo "Downloading dexlib2.jar..."
+          curl -fsSL "$BASE_URL/dexlib2.jar" -o "$INSTALL_DIR/dexlib2.jar"
+          echo "Downloading util.jar..."
+          curl -fsSL "$BASE_URL/util.jar" -o "$INSTALL_DIR/util.jar"
+
+          # Download skills
+          echo "Downloading skills..."
+          curl -fsSL "$BASE_URL/skills.tar.gz" | tar -xzf - -C "$SKILLS_DIR" --strip-components=1
+
+          # Make jars executable hint
+          chmod +r "$INSTALL_DIR/smali.jar" "$INSTALL_DIR/baksmali.jar" 2>/dev/null || true
+
+          echo ""
+          echo "=== Installation complete ==="
+          echo ""
+          echo "Usage:"
+          echo "  java -jar $INSTALL_DIR/smali.jar assemble -o out.dex <smali_dir>"
+          echo "  java -jar $INSTALL_DIR/baksmali.jar disassemble -o out <dex_file>"
+          echo "  java -jar $INSTALL_DIR/baksmali.jar list strings <dex_file>"
+          echo ""
+          echo "Skills installed to: $SKILLS_DIR"
+          INSTALL_EOF
+          chmod +x release-assets/install.sh
+
+          # Create skills tarball
+          cd release-assets && tar -czf skills.tar.gz skills/ && rm -rf skills/
+
+          echo "=== Release assets ==="
+          ls -lh release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: smali-skills v${{ steps.version.outputs.version }}
+          body: |
+            ## smali-skills v${{ steps.version.outputs.version }}
+
+            Android dex 字节码工具集 — 汇编/反汇编/分析/变换
+
+            ### 下载安装
+
+            ```bash
+            # 一键安装
+            curl -fsSL https://github.com/android-security-engineer/smali-skills/releases/latest/download/install.sh | bash
+
+            # 指定版本安装
+            curl -fsSL https://github.com/android-security-engineer/smali-skills/releases/latest/download/install.sh | bash -s 2.5.2
+            ```
+
+            ### 手动下载
+
+            | 文件 | 说明 |
+            |------|------|
+            | `smali.jar` | smali 汇编器 fat jar |
+            | `baksmali.jar` | baksmali 反汇编器 fat jar |
+            | `skills.tar.gz` | Skills 层文档 |
+            | `install.sh` | 安装脚本 |
+
+            ### 使用
+
+            ```bash
+            # 汇编 smali → dex
+            java -jar smali.jar assemble -o out.dex <smali_dir>
+
+            # 反汇编 dex → smali
+            java -jar baksmali.jar disassemble -o out <dex_file>
+
+            # 列举字符串
+            java -jar baksmali.jar list strings <dex_file>
+            ```
+          files: |
+            release-assets/smali.jar
+            release-assets/baksmali.jar
+            release-assets/dexlib2.jar
+            release-assets/util.jar
+            release-assets/smali-${{ steps.version.outputs.version }}.jar
+            release-assets/baksmali-${{ steps.version.outputs.version }}.jar
+            release-assets/skills.tar.gz
+            release-assets/install.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
