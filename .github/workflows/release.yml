@@ -61,10 +61,12 @@ jobs:
           cp baksmali/build/libs/baksmali.jar release-assets/baksmali.jar
 
           # Copy dexlib2 jar (for programmatic use)
-          cp dexlib2/build/libs/dexlib2-*.jar release-assets/dexlib2.jar
+          DEXLIB2_JAR=$(ls dexlib2/build/libs/dexlib2-*.jar | grep -v sources | grep -v javadoc | head -1)
+          cp "$DEXLIB2_JAR" release-assets/dexlib2.jar
 
           # Copy util jar
-          cp util/build/libs/util-*.jar release-assets/util.jar
+          UTIL_JAR=$(ls util/build/libs/util-*.jar | grep -v sources | grep -v javadoc | head -1)
+          cp "$UTIL_JAR" release-assets/util.jar
 
           # Copy skills
           cp -r .claude/skills release-assets/skills
