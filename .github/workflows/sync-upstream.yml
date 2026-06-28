@@ -1,0 +1,59 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天北京时间 09:00 (UTC 01:00) 检查上游更新
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/JesusFreke/smali.git
+          git fetch upstream
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          NEW_COMMITS=$(git log HEAD..upstream/master --oneline)
+          if [ -z "$NEW_COMMITS" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No upstream changes found."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Upstream changes found:"
+            echo "$NEW_COMMITS"
+          fi
+
+      - name: Merge upstream changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git merge upstream/master --no-edit
+
+      - name: Push merged changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git push origin master
+
+      - name: Create summary
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          echo "## Upstream Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Merged new commits from JesusFreke/smali:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          git log HEAD~$(git log HEAD..upstream/master --oneline | wc -l)..HEAD --oneline >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

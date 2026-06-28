@@ -10,27 +10,20 @@ description: "Use when the user asks to: (1) disassemble a dex/apk/odex/oat file
 ## 前置条件
 
 ```bash
-# 方式1: 一键安装（推荐）
-curl -fsSL https://github.com/android-security-engineer/smali-skills/releases/latest/download/install.sh | bash
-
-# 方式2: 仅下载 jar
 curl -fsSL -o baksmali.jar https://github.com/android-security-engineer/smali-skills/releases/latest/download/baksmali.jar
-
-# 方式3: 从源码构建
-JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 ./gradlew :baksmali:build -x test -x javadoc
 ```
 
 ## 快速参考
 
 ```bash
 # 基本反汇编
-java -jar baksmali/build/libs/baksmali.jar disassemble -o <输出目录> <输入文件>
+java -jar baksmali.jar disassemble -o <输出目录> <输入文件>
 
 # 反汇编 APK（自动识别 zip 中的 classes.dex）
-java -jar baksmali/build/libs/baksmali.jar d -o out app.apk
+java -jar baksmali.jar d -o out app.apk
 
 # 只反汇编特定类
-java -jar baksmali/build/libs/baksmali.jar d -o out --classes Lcom/example/Main app.apk
+java -jar baksmali.jar d -o out --classes Lcom/example/Main app.apk
 ```
 
 ## 支持的输入格式
@@ -45,7 +38,7 @@ java -jar baksmali/build/libs/baksmali.jar d -o out --classes Lcom/example/Main 
 ## 完整选项
 
 ```bash
-java -jar baksmali/build/libs/baksmali.jar disassemble \
+java -jar baksmali.jar disassemble \
   -o <输出目录> \                    # 输出目录（默认 out）
   -a <api级别> \                     # API 级别（默认 15）
   -j <线程数> \                      # 并行线程数
@@ -83,7 +76,7 @@ java -jar baksmali/build/libs/baksmali.jar disassemble \
 将字节码中的 `0x7f010001` 等资源 ID 解析为可读名称：
 
 ```bash
-java -jar baksmali/build/libs/baksmali.jar d -o out \
+java -jar baksmali.jar d -o out \
   --resolve-resources android.R framework/res/values/public.xml \
   app.apk
 ```
@@ -94,20 +87,20 @@ java -jar baksmali/build/libs/baksmali.jar d -o out \
 
 ```bash
 # 1. 反汇编 APK
-java -jar baksmali/build/libs/baksmali.jar d -o smali_out app.apk
+java -jar baksmali.jar d -o smali_out app.apk
 
 # 2. 查看特定类的 smali 代码
 cat smali_out/com/example/Main.smali
 
 # 3. 带寄存器类型信息反汇编（深度分析）
-java -jar baksmali/build/libs/baksmali.jar d -o out -r ALL app.apk
+java -jar baksmali.jar d -o out -r ALL app.apk
 
 # 4. 省略调试信息（更干净的输出）
-java -jar baksmali/build/libs/baksmali.jar d -o out --debug-info=false app.apk
+java -jar baksmali.jar d -o out --debug-info=false app.apk
 ```
 
 ## 注意事项
 
 - 反汇编 odex/oat 文件时若未 deodex，输出将包含优化指令，**无法重新汇编**。此时应使用 `dex-deodex` skill。
-- 多 dex APK 默认只处理 `classes.dex`。需要处理其他 dex 时，使用 `dex-list` skill 查看条目后指定。
+- 多 dex APK 默认只处理 `classes.dex`。需要处理其他 dex 时，使用 `dex-list-structure` skill 查看条目后指定，或参考 `dex-multidex` skill。
 - `--resolve-resources` 需要对应 Android 框架的 `public.xml` 文件。

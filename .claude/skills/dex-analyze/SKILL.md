@@ -19,22 +19,22 @@ curl -fsSL -o baksmali.jar https://github.com/android-security-engineer/smali-sk
 
 ```bash
 # 寄存器类型推断（最常用）
-java -jar baksmali/build/libs/baksmali.jar d -o out -r ALL app.apk
+java -jar baksmali.jar d -o out -r ALL app.apk
 
 # 查看指令前寄存器类型
-java -jar baksmali/build/libs/baksmali.jar d -o out -r ALLPRE app.apk
+java -jar baksmali.jar d -o out -r ALLPRE app.apk
 
 # 查看指令后寄存器类型
-java -jar baksmali/build/libs/baksmali.jar d -o out -r ALLPOST app.apk
+java -jar baksmali.jar d -o out -r ALLPOST app.apk
 
 # 仅查看参数和目标寄存器
-java -jar baksmali/build/libs/baksmali.jar d -o out -r ARGS,DEST app.apk
+java -jar baksmali.jar d -o out -r ARGS,DEST app.apk
 
 # 合并点完整类型集（调试分支合并）
-java -jar baksmali/build/libs/baksmali.jar d -o out -r MERGE,FULLMERGE app.apk
+java -jar baksmali.jar d -o out -r MERGE,FULLMERGE app.apk
 
 # 虚方法归一化
-java -jar baksmali/build/libs/baksmali.jar d -o out --normalize-virtual-methods app.apk
+java -jar baksmali.jar d -o out --normalize-virtual-methods app.apk
 ```
 
 ## 寄存器信息类型详解
@@ -103,7 +103,7 @@ for (AnalyzedInstruction insn : analyzer.getAnalyzedInstructions()) {
 
 ```bash
 # 带 full merge 信息的反汇编，帮助理解混淆后的类型流
-java -jar baksmali/build/libs/baksmali.jar d -o out \
+java -jar baksmali.jar d -o out \
   -r ALL,FULLMERGE --sequential-labels \
   obfuscated.apk
 ```
@@ -112,7 +112,7 @@ java -jar baksmali/build/libs/baksmali.jar d -o out \
 
 ```bash
 # 去odex时如果出现 UnresolvedOdexInstruction，用 register info 定位问题
-java -jar baksmali/build/libs/baksmali.jar d -o out \
+java -jar baksmali.jar d -o out \
   -r ALL,FULLMERGE --normalize-virtual-methods \
   app.odex
 ```
@@ -121,7 +121,7 @@ java -jar baksmali/build/libs/baksmali.jar d -o out \
 
 ```bash
 # 只反汇编目标类 + 全量寄存器信息
-java -jar baksmali/build/libs/baksmali.jar d -o out \
+java -jar baksmali.jar d -o out \
   --classes Lcom/target/Class -r ALL \
   app.apk
 ```

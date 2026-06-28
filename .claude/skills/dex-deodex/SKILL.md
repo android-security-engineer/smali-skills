@@ -33,15 +33,15 @@ JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 ./gradlew :baksmali:build -x test -
 
 ```bash
 # 去 odex（基本用法）
-java -jar baksmali/build/libs/baksmali.jar deodex -o <输出目录> <odex/oat文件>
+java -jar baksmali.jar deodex -o <输出目录> <odex/oat文件>
 
 # 去 odex 并指定类路径
-java -jar baksmali/build/libs/baksmali.jar deodex -o out \
+java -jar baksmali.jar deodex -o out \
   --boot-class-path /system/framework/framework.jar \
   app.odex
 
 # 使用自定义内联方法表
-java -jar baksmali/build/libs/baksmali.jar deodex -o out \
+java -jar baksmali.jar deodex -o out \
   --inline-table inline_methods.txt \
   app.odex
 ```
@@ -49,7 +49,7 @@ java -jar baksmali/build/libs/baksmali.jar deodex -o out \
 ## 完整选项
 
 ```bash
-java -jar baksmali/build/libs/baksmali.jar deodex \
+java -jar baksmali.jar deodex \
   -o <输出目录> \                    # 输出目录（默认 out）
   -a <api级别> \                     # API 级别
   -j <线程数> \                      # 并行线程数
@@ -89,7 +89,7 @@ adb shell chmod +x /data/local/deodexerant
 adb shell /data/local/deodexerant > inline_methods.txt
 
 # 使用导出的内联表
-java -jar baksmali/build/libs/baksmali.jar deodex -o out \
+java -jar baksmali.jar deodex -o out \
   --inline-table inline_methods.txt app.odex
 ```
 
@@ -97,15 +97,15 @@ java -jar baksmali/build/libs/baksmali.jar deodex -o out \
 
 ```bash
 # 1. 去 odex
-java -jar baksmali/build/libs/baksmali.jar deodex -o smali_out \
+java -jar baksmali.jar deodex -o smali_out \
   --boot-class-path /system/framework/framework.jar \
   app.odex
 
 # 2. 验证输出可重汇编
-java -jar smali/build/libs/smali.jar a -o rebuilt.dex smali_out/
+java -jar smali.jar a -o rebuilt.dex smali_out/
 
 # 3. 对比原始与重建
-java -jar baksmali/build/libs/baksmali.jar d -o verified rebuilt.dex
+java -jar baksmali.jar d -o verified rebuilt.dex
 ```
 
 ## disassemble vs deodex

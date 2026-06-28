@@ -24,19 +24,19 @@ JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 ./gradlew :smali:build -x test -x j
 
 ```bash
 # 基本汇编
-java -jar smali/build/libs/smali.jar assemble -o <输出.dex> <输入目录|文件>
+java -jar smali.jar assemble -o <输出.dex> <输入目录|文件>
 
 # 汇编整个目录（递归搜索 .smali 文件）
-java -jar smali/build/libs/smali.jar a -o out.dex smali_src/
+java -jar smali.jar a -o out.dex smali_src/
 
 # 指定 API 级别（影响可用操作码）
-java -jar smali/build/libs/smali.jar a -o out.dex -a 28 smali_src/
+java -jar smali.jar a -o out.dex -a 28 smali_src/
 ```
 
 ## 完整选项
 
 ```bash
-java -jar smali/build/libs/smali.jar assemble \
+java -jar smali.jar assemble \
   -o <输出.dex> \                    # 输出 dex 文件路径（默认 out.dex）
   -a <api级别> \                     # API 级别（默认 15），决定可用操作码
   -j <线程数> \                      # 并行编译线程数（默认 CPU 核心数）
@@ -79,10 +79,10 @@ cat > src/com/example/HelloWorld.smali << 'EOF'
 EOF
 
 # 2. 汇编
-java -jar smali/build/libs/smali.jar a -o hello.dex src/
+java -jar smali.jar a -o hello.dex src/
 
 # 3. 验证
-java -jar baksmali/build/libs/baksmali.jar d -o verified hello.dex
+java -jar baksmali.jar d -o verified hello.dex
 diff -r src/ verified/
 ```
 
@@ -90,13 +90,13 @@ diff -r src/ verified/
 
 ```bash
 # 1. 反汇编原始 APK
-java -jar baksmali/build/libs/baksmali.jar d -o smali_out original.apk
+java -jar baksmali.jar d -o smali_out original.apk
 
 # 2. 修改 smali 文件
 vim smali_out/com/example/Main.smali
 
 # 3. 重新汇编
-java -jar smali/build/libs/smali.jar a -o modified.dex smali_out/
+java -jar smali.jar a -o modified.dex smali_out/
 
 # 4. 替换回 APK
 cp modified.dex extracted/classes.dex
@@ -120,7 +120,7 @@ cp modified.dex extracted/classes.dex
 
 ```bash
 # 汇编示例
-java -jar smali/build/libs/smali.jar a -o helloworld.dex examples/HelloWorld/
+java -jar smali.jar a -o helloworld.dex examples/HelloWorld/
 ```
 
 ## 常见错误

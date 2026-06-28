@@ -32,7 +32,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew build -x test -x javadoc
+        run: ./gradlew build -x javadoc
 
       - name: Run tests
         run: ./gradlew test
@@ -56,7 +56,7 @@ jobs:
           cp smali/build/libs/smali.jar release-assets/smali-${{ steps.version.outputs.version }}.jar
           cp baksmali/build/libs/baksmali.jar release-assets/baksmali-${{ steps.version.outputs.version }}.jar
 
-          # Also create version-agnostic symlinks (copies on non-Windows)
+          # Also create version-agnostic copies
           cp smali/build/libs/smali.jar release-assets/smali.jar
           cp baksmali/build/libs/baksmali.jar release-assets/baksmali.jar
 
@@ -116,8 +116,13 @@ jobs:
           # Make jars executable hint
           chmod +r "$INSTALL_DIR/smali.jar" "$INSTALL_DIR/baksmali.jar" 2>/dev/null || true
 
+          # Set up convenience environment variables
           echo ""
           echo "=== Installation complete ==="
+          echo ""
+          echo "Add to your shell profile (.bashrc/.zshrc):"
+          echo "  export SMALI_JAR=\"$INSTALL_DIR/smali.jar\""
+          echo "  export BAKSMALI_JAR=\"$INSTALL_DIR/baksmali.jar\""
           echo ""
           echo "Usage:"
           echo "  java -jar $INSTALL_DIR/smali.jar assemble -o out.dex <smali_dir>"
@@ -161,6 +166,8 @@ jobs:
             |------|------|
             | `smali.jar` | smali 汇编器 fat jar |
             | `baksmali.jar` | baksmali 反汇编器 fat jar |
+            | `dexlib2.jar` | dexlib2 核心库 jar |
+            | `util.jar` | 工具库 jar |
             | `skills.tar.gz` | Skills 层文档 |
             | `install.sh` | 安装脚本 |
 

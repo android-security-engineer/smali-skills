@@ -1,0 +1,99 @@
+---
+name: dex-list-methods
+description: "Use when the user asks to: (1) list methods in a dex/apk file, (2) find or search method names in Android bytecode, (3) enumerate the method table, (4) look up method signatures. Triggers: list methods, 方法表, method table, 方法列举, find method, search method, 方法搜索, baksmali list m."
+---
+
+# dex-list-methods — 列举 dex 文件中的方法
+
+快速提取 dex/apk 文件中的所有方法引用，无需完整反汇编。
+
+## 前置条件
+
+```bash
+curl -fsSL -o baksmali.jar https://github.com/android-security-engineer/smali-skills/releases/latest/download/baksmali.jar
+```
+
+## 快速参考
+
+```bash
+# 列举所有方法
+java -jar baksmali.jar list methods app.apk
+
+# 短别名
+java -jar baksmali.jar l m app.apk
+```
+
+## 输出格式
+
+每行一个方法引用，格式为 `类名->方法名(参数类型)返回类型`：
+
+```
+Lcom/example/Main;->onCreate(Landroid/os/Bundle;)V
+Lcom/example/Main;->login(Ljava/lang/String;Ljava/lang/String;)Z
+Lcom/example/Network;->fetchData(Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+Ljava/lang/Object;-><init>()V
+```
+
+## 实用技巧
+
+### 搜索特定方法
+
+```bash
+# 搜索特定类的方法
+java -jar baksmali.jar l m app.apk | grep "com/example"
+
+# 搜索构造函数
+java -jar baksmali.jar l m app.apk | grep "-><init>"
+
+# 搜索特定方法名
+java -jar baksmali.jar l m app.apk | grep "->login\b"
+
+# 搜索 onClick 处理器
+java -jar baksmali.jar l m app.apk | grep "->onClick"
+```
+
+### 按签名模式搜索
+
+```bash
+# 搜索返回 String 的方法
+java -jar baksmali.jar l m app.apk | grep ")Ljava/lang/String;$"
+
+# 搜索接受 Context 参数的方法
+java -jar baksmali.jar l m app.apk | grep "Landroid/content/Context;"
+
+# 搜索静态方法（需结合反汇编确认）
+java -jar baksmali.jar l m app.apk | grep "Lcom/example.*->.*\)"
+```
+
+### 导出分析
+
+```bash
+# 导出到文件
+java -jar baksmali.jar l m app.apk > methods.txt
+
+# 统计方法数量
+java -jar baksmali.jar l m app.apk | wc -l
+
+# 按类分组统计
+java -jar baksmali.jar l m app.apk | cut -d'-' -f1 | sort | uniq -c | sort -rn | head -20
+
+# 提取类名列表
+java -jar baksmali.jar l m app.apk | cut -d'-' -f1 | sort -u
+```
+
+### 多 dex APK
+
+```bash
+# 列举特定 dex 的方法
+java -jar baksmali.jar l m "app.apk/classes2.dex"
+```
+
+## 典型场景
+
+| 场景 | 命令 |
+|------|------|
+| 查找入口方法 | `java -jar baksmali.jar l m app.apk \| grep "->main("` |
+| 查找生命周期方法 | `java -jar baksmali.jar l m app.apk \| grep "->onCreate\|->onResume\|->onPause"` |
+| 查找网络方法 | `java -jar baksmali.jar l m app.apk \| grep -i "http\|request\|fetch\|upload"` |
+| 查找加密方法 | `java -jar baksmali.jar l m app.apk \| grep -iE "cipher\|encrypt\|decrypt\|digest"` |
+| 分析类的方法数量 | `java -jar baksmali.jar l m app.apk \| cut -d'-' -f1 \| sort \| uniq -c \| sort -rn` |
