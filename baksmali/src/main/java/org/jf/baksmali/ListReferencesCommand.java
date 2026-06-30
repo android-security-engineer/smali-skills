@@ -33,10 +33,17 @@ package org.jf.baksmali;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.gson.JsonObject;
 import org.jf.baksmali.formatter.BaksmaliFormatter;
+import org.jf.baksmali.output.AggregatingOutput;
+import org.jf.baksmali.output.JsonOutput;
+import org.jf.dexlib2.iface.reference.FieldReference;
+import org.jf.dexlib2.iface.reference.MethodReference;
 import org.jf.dexlib2.iface.reference.Reference;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ListReferencesCommand extends DexInputCommand {
@@ -46,6 +53,12 @@ public abstract class ListReferencesCommand extends DexInputCommand {
     @Parameter(names = {"-h", "-?", "--help"}, help = true,
             description = "Show usage information")
     private boolean help;
+
+    @ParametersDelegate
+    private OutputFormatArguments outputFormat = new OutputFormatArguments();
+
+    @ParametersDelegate
+    private ListAggregationArguments aggregation = new ListAggregationArguments();
 
     public ListReferencesCommand(@Nonnull List<JCommander> commandAncestors, int referenceType) {
         super(commandAncestors);
@@ -67,10 +80,54 @@ public abstract class ListReferencesCommand extends DexInputCommand {
         String input = inputList.get(0);
         loadDexFile(input);
 
+        // Materialize the references so we can count/group without re-walking.
+        List<Reference> references = new ArrayList<>();
+        for (Reference reference : dexFile.getReferences(referenceType)) {
+            references.add(reference);
+        }
+
+        if (aggregation.isCount()) {
+            new AggregatingOutput(outputFormat).renderCount(references.size());
+            return;
+        }
+
+        if (aggregation.getGroupBy() == ListAggregationArguments.GroupBy.CLASS) {
+            // group-by class only makes sense for references that carry a defining class.
+            if (referenceType != org.jf.dexlib2.ReferenceType.METHOD
+                    && referenceType != org.jf.dexlib2.ReferenceType.FIELD) {
+                System.err.println("--group-by class only applies to methods and fields; ignoring.");
+            } else {
+                AggregatingOutput agg = new AggregatingOutput(outputFormat);
+                agg.renderGroupedBy(references, this::definingClassOf, null);
+                return;
+            }
+        }
+
+        if (outputFormat.isJson()) {
+            JsonOutput jsonOutput = new JsonOutput();
+            List<JsonObject> objects = new ArrayList<>();
+            for (Reference reference : references) {
+                objects.add(jsonOutput.toJson(reference));
+            }
+            System.out.println(jsonOutput.toJsonArray(objects));
+            return;
+        }
+
         BaksmaliFormatter formatter = new BaksmaliFormatter();
 
-        for (Reference reference: dexFile.getReferences(referenceType)) {
+        for (Reference reference : references) {
             System.out.println(formatter.getReference(reference));
         }
+    }
+
+    @Nonnull
+    private String definingClassOf(@Nonnull Reference reference) {
+        if (reference instanceof MethodReference) {
+            return ((MethodReference) reference).getDefiningClass();
+        }
+        if (reference instanceof FieldReference) {
+            return ((FieldReference) reference).getDefiningClass();
+        }
+        return "(unknown)";
     }
 }

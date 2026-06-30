@@ -85,6 +85,9 @@ java -jar $BAKSMALI_JAR disassemble -o out app.apk
 | 浏览 dex 中的字符串 | `dex-list-strings` | `java -jar baksmali.jar l s app.apk` |
 | 浏览 dex 中的方法 | `dex-list-methods` | `java -jar baksmali.jar l m app.apk` |
 | 浏览 dex 中的类/类型/字段 | `dex-list-classes` | `java -jar baksmali.jar l c app.apk` |
+| 结构化输出（JSON/计数） | `dex-list-methods` | `java -jar baksmali.jar l m --format json app.apk` |
+| 谁调用了某方法 | `dex-xref` | `java -jar baksmali.jar xref callers --target "Lc;->foo()V" app.apk` |
+| 搜索指令序列 | `dex-search` | `java -jar baksmali.jar search --opcode const-string,invoke-virtual app.apk` |
 | 反汇编→修改→重汇编 | `dex-roundtrip` | 见完整工作流 |
 
 ### 🟡 进阶操作 — 分析与变换
@@ -193,8 +196,13 @@ java -jar baksmali.jar <子命令> [选项] <输入文件>
 | `deodex` | `x`, `de` | 去 odex |
 | `dump` | `du` | 十六进制转储 |
 | `list` | `l` | 列举对象（见下） |
+| `xref` | — | 反向交叉引用（callers/field-refs/type-refs），见 `dex-xref` |
+| `search` | `find` | 指令模式搜索（--opcode/--class/--method），见 `dex-search` |
 
 ### baksmali list 子命令
+
+list 子命令支持 `--format json`（机器可读）、`--count`（仅总数）、`--group-by class`
+（按定义类分组计数），详见 `dex-list-methods`。
 
 | 子命令 | 别名 | 列举内容 | Skill |
 |--------|------|---------|-------|

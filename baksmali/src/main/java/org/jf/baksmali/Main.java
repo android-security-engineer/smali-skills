@@ -86,6 +86,8 @@ public class Main extends Command {
         ExtendedCommands.addExtendedCommand(jc, new HelpCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new HlepCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new ListCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new XrefCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new SearchCommand(commandHierarchy));
 
         jc.parse(args);
 

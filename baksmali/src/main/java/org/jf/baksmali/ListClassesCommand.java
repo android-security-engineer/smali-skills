@@ -34,11 +34,16 @@ package org.jf.baksmali;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.gson.JsonObject;
 import org.jf.baksmali.formatter.BaksmaliFormatter;
+import org.jf.baksmali.output.AggregatingOutput;
+import org.jf.baksmali.output.JsonOutput;
 import org.jf.dexlib2.iface.ClassDef;
 import org.jf.util.jcommander.ExtendedParameters;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Parameters(commandDescription = "Lists the classes in a dex file.")
@@ -50,6 +55,12 @@ public class ListClassesCommand extends DexInputCommand {
     @Parameter(names = {"-h", "-?", "--help"}, help = true,
             description = "Show usage information")
     private boolean help;
+
+    @ParametersDelegate
+    private OutputFormatArguments outputFormat = new OutputFormatArguments();
+
+    @ParametersDelegate
+    private ListAggregationArguments aggregation = new ListAggregationArguments();
 
     public ListClassesCommand(@Nonnull List<JCommander> commandAncestors) {
         super(commandAncestors);
@@ -69,6 +80,32 @@ public class ListClassesCommand extends DexInputCommand {
 
         String input = inputList.get(0);
         loadDexFile(input);
+
+        // --count: emit only the total number of classes.
+        if (aggregation.isCount()) {
+            int count = 0;
+            for (ClassDef ignored : dexFile.getClasses()) {
+                count++;
+            }
+            new AggregatingOutput(outputFormat).renderCount(count);
+            return;
+        }
+
+        // --group-by is not meaningful for the class list itself (each class is its own bucket);
+        // if requested, warn and fall through to the normal listing.
+        if (aggregation.getGroupBy() != ListAggregationArguments.GroupBy.NONE) {
+            System.err.println("--group-by has no effect on 'list classes'; ignoring.");
+        }
+
+        if (outputFormat.isJson()) {
+            JsonOutput jsonOutput = new JsonOutput();
+            List<JsonObject> objects = new ArrayList<>();
+            for (ClassDef classDef : dexFile.getClasses()) {
+                objects.add(jsonOutput.toJson(classDef));
+            }
+            System.out.println(jsonOutput.toJsonArray(objects));
+            return;
+        }
 
         BaksmaliFormatter formatter = new BaksmaliFormatter();
 

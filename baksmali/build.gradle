@@ -43,6 +43,7 @@ dependencies {
     api project(':dexlib2')
     implementation depends.guava
     implementation depends.jcommander
+    implementation depends.gson
 
     testImplementation depends.junit
     testImplementation project(':smali')

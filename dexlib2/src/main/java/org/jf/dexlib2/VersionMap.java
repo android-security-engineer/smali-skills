@@ -44,6 +44,10 @@ public class VersionMap {
                 return 27;
             case 39:
                 return 28;
+            case 40:
+                // dex version 040 was introduced in Android 11 (API 30) to support
+                // additional hiddenapi restrictions (greylist-max-target-r etc.)
+                return 30;
             default:
                 return NO_VERSION;
         }
@@ -59,10 +63,22 @@ public class VersionMap {
         if (api <= 27) {
             return 38;
         }
-        return 39;
+        if (api <= 29) {
+            return 39;
+        }
+        // API 30+ uses dex version 040
+        return 40;
     }
 
     public static int mapArtVersionToApi(int artVersion) {
+        if (artVersion >= 189) {
+            // Android 12 (API 31) and above
+            return 31;
+        }
+        if (artVersion >= 188) {
+            // Android 11 (API 30)
+            return 30;
+        }
         if (artVersion >= 170) {
             return 29;
         }
@@ -116,9 +132,14 @@ public class VersionMap {
                 return 138;
             case 29:
                 return 170;
+            case 30:
+                return 188;
             default:
-                // 178 is the current version in the master branch of AOSP as of 2020-02-02
-                return 178;
+                // For API 31+ (Android 12 and above), return the latest known ART version.
+                // 188 is the version corresponding to Android 11; later versions use higher
+                // values but ART opcode set has been stable since. We return 188 as a
+                // conservative lower bound for API 31+.
+                return 188;
         }
     }
 }

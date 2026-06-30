@@ -34,6 +34,30 @@ Lcom/example/Network;->fetchData(Ljava/lang/String;Ljava/util/Map;)Ljava/lang/St
 Ljava/lang/Object;-><init>()V
 ```
 
+## 结构化输出（推荐给 Agent / 脚本）
+
+无需 `grep`/`wc` 管道，原生支持 JSON 与聚合，输出更可靠：
+
+```bash
+# JSON 数组，适合程序消费（每项含 class/name/parameters/returnType）
+java -jar baksmali.jar list methods --format json app.apk
+
+# 仅输出方法总数
+java -jar baksmali.jar list methods --count app.apk
+
+# 按定义类分组计数（text: "数量\t类"，json: [{group,count}]）
+java -jar baksmali.jar list methods --group-by class app.apk
+java -jar baksmali.jar list methods --group-by class --format json app.apk
+```
+
+JSON schema：
+
+```json
+[{"class":"Lcom/Example;","name":"foo","parameters":["I"],"returnType":"V"}]
+```
+
+> 交叉引用（谁调用了某方法）见 [[dex-xref]]；指令序列搜索见 [[dex-search]]。
+
 ## 实用技巧
 
 ### 搜索特定方法
