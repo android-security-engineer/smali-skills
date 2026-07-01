@@ -37,6 +37,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.jf.smali.format.SmaliFormatter;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -141,6 +142,9 @@ public class SmaliLanguageServer {
             case "textDocument/hover":
                 sendResult(id, hover(params));
                 return false;
+            case "textDocument/formatting":
+                sendResult(id, formatting(params));
+                return false;
             default:
                 if (id != null && !id.isJsonNull()) {
                     // Respond with an empty result to unknown requests so clients
@@ -172,6 +176,7 @@ public class SmaliLanguageServer {
         capabilities.addProperty("textDocumentSync", 1);
         capabilities.addProperty("documentSymbolProvider", true);
         capabilities.addProperty("hoverProvider", true);
+        capabilities.addProperty("documentFormattingProvider", true);
 
         JsonObject serverInfo = new JsonObject();
         serverInfo.addProperty("name", "smali-language-server");
@@ -233,6 +238,43 @@ public class SmaliLanguageServer {
         }
         LspModels.Hover result = new LspModels.Hover(new LspModels.MarkupContent("markdown", doc));
         return gson.toJsonTree(result);
+    }
+
+    /**
+     * Handles {@code textDocument/formatting}: reformats the whole document with
+     * {@link SmaliFormatter} and returns a single full-range {@code TextEdit}. If the document is
+     * unknown or already formatted, returns an empty edit list.
+     */
+    private JsonElement formatting(JsonObject params) {
+        String uri = params.getAsJsonObject("textDocument").get("uri").getAsString();
+        String text = documents.get(uri);
+        JsonArray edits = new JsonArray();
+        if (text == null) {
+            return edits;
+        }
+        String formatted = new SmaliFormatter().format(text);
+        if (formatted.equals(text)) {
+            return edits;
+        }
+
+        // A single edit replacing the entire document. The end position is the start of the line
+        // just past the last one, which addresses the whole buffer regardless of a trailing newline.
+        int lineCount = text.split("\n", -1).length;
+        JsonObject start = new JsonObject();
+        start.addProperty("line", 0);
+        start.addProperty("character", 0);
+        JsonObject end = new JsonObject();
+        end.addProperty("line", lineCount);
+        end.addProperty("character", 0);
+        JsonObject range = new JsonObject();
+        range.add("start", start);
+        range.add("end", end);
+
+        JsonObject edit = new JsonObject();
+        edit.add("range", range);
+        edit.addProperty("newText", formatted);
+        edits.add(edit);
+        return edits;
     }
 
     private void publishDiagnostics(String uri, String text) throws IOException {

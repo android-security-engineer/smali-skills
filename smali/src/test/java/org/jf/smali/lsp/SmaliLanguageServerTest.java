@@ -137,6 +137,77 @@ public class SmaliLanguageServerTest {
         Assert.assertTrue("expected the missing-.super diagnostic", diags.size() > 0);
     }
 
+    @Test
+    public void formatting_returnsFullRangeEditWithFormattedText() throws IOException {
+        // A document with a tab indent and trailing whitespace that the formatter will normalize.
+        String messy = ".class public LA;\\n.super Ljava/lang/Object;\\n" +
+                ".method public foo()V\\n\\t.registers 1   \\nreturn-void\\n.end method\\n";
+        List<String> requests = new ArrayList<>();
+        requests.add("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/didOpen\",\"params\":{" +
+                "\"textDocument\":{\"uri\":\"file:///Fmt.smali\",\"languageId\":\"smali\"," +
+                "\"version\":1,\"text\":\"" + messy + "\"}}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"textDocument/formatting\",\"params\":{" +
+                "\"textDocument\":{\"uri\":\"file:///Fmt.smali\"}," +
+                "\"options\":{\"tabSize\":4,\"insertSpaces\":true}}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"method\":\"exit\",\"params\":{}}");
+
+        ByteArrayOutputStream framedIn = new ByteArrayOutputStream();
+        for (String r : requests) {
+            SmaliLanguageServer.writeMessage(framedIn, r);
+        }
+
+        ByteArrayOutputStream serverOut = new ByteArrayOutputStream();
+        new SmaliLanguageServer(new ByteArrayInputStream(framedIn.toByteArray()), serverOut).run();
+
+        List<JsonObject> responses = drain(serverOut.toByteArray());
+
+        JsonObject initResult = findById(responses, 1);
+        Assert.assertNotNull(initResult);
+        Assert.assertTrue("server should advertise formatting support", initResult.getAsJsonObject("result")
+                .getAsJsonObject("capabilities").get("documentFormattingProvider").getAsBoolean());
+
+        JsonObject formatResult = findById(responses, 2);
+        Assert.assertNotNull("expected a formatting response", formatResult);
+        JsonArray edits = formatResult.getAsJsonArray("result");
+        Assert.assertEquals("expected a single full-document edit", 1, edits.size());
+        JsonObject edit = edits.get(0).getAsJsonObject();
+        String newText = edit.get("newText").getAsString();
+        Assert.assertTrue("body should be indented with four spaces",
+                newText.contains("\n    .registers 1\n"));
+        Assert.assertFalse("formatted output must not contain tabs", newText.contains("\t"));
+        // The full-range edit starts at 0:0.
+        JsonObject start = edit.getAsJsonObject("range").getAsJsonObject("start");
+        Assert.assertEquals(0, start.get("line").getAsInt());
+        Assert.assertEquals(0, start.get("character").getAsInt());
+    }
+
+    @Test
+    public void formatting_returnsNoEditsForAlreadyFormattedDocument() throws IOException {
+        String clean = ".class public LA;\\n.super Ljava/lang/Object;\\n";
+        List<String> requests = new ArrayList<>();
+        requests.add("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"method\":\"textDocument/didOpen\",\"params\":{" +
+                "\"textDocument\":{\"uri\":\"file:///Clean.smali\",\"languageId\":\"smali\"," +
+                "\"version\":1,\"text\":\"" + clean + "\"}}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"textDocument/formatting\",\"params\":{" +
+                "\"textDocument\":{\"uri\":\"file:///Clean.smali\"},\"options\":{}}}");
+        requests.add("{\"jsonrpc\":\"2.0\",\"method\":\"exit\",\"params\":{}}");
+
+        ByteArrayOutputStream framedIn = new ByteArrayOutputStream();
+        for (String r : requests) {
+            SmaliLanguageServer.writeMessage(framedIn, r);
+        }
+
+        ByteArrayOutputStream serverOut = new ByteArrayOutputStream();
+        new SmaliLanguageServer(new ByteArrayInputStream(framedIn.toByteArray()), serverOut).run();
+
+        JsonObject formatResult = findById(drain(serverOut.toByteArray()), 2);
+        Assert.assertNotNull(formatResult);
+        Assert.assertEquals("clean document needs no edits", 0,
+                formatResult.getAsJsonArray("result").size());
+    }
+
     private static List<JsonObject> drain(byte[] framed) throws IOException {
         List<JsonObject> messages = new ArrayList<>();
         InputStream in = new ByteArrayInputStream(framed);
