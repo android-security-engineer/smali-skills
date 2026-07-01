@@ -89,6 +89,7 @@ java -jar $BAKSMALI_JAR disassemble -o out app.apk
 | 谁调用了某方法 | `dex-xref` | `java -jar baksmali.jar xref callers --target "Lc;->foo()V" app.apk` |
 | 搜索指令序列 | `dex-search` | `java -jar baksmali.jar search --opcode const-string,invoke-virtual app.apk` |
 | 在编辑器中获得 smali 诊断/大纲/悬浮 | `smali-lsp` | `java -jar smali.jar lsp`（LSP over stdio） |
+| 把 dex 查询暴露给 AI Agent（MCP） | `smali-mcp` | `java -jar baksmali.jar mcp`（MCP over stdio） |
 | 反汇编→修改→重汇编 | `dex-roundtrip` | 见完整工作流 |
 
 ### 🟡 进阶操作 — 分析与变换
