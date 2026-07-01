@@ -135,6 +135,15 @@ baksmali search app.apk --class 'Lcom/.*' --method onCreate          # 类/方�
 baksmali search app.apk --opcode invoke-virtual --format json
 ```
 
+### 语义差异（diff）—— opcode 级两文件比较
+
+```bash
+baksmali diff old.apk new.apk                 # 文本报告：+/- 类、~ 改动类及其方法
+baksmali diff old.apk new.apk --format json   # 机器可读；退出码 0=一致 1=有差异
+```
+
+忽略寄存器分配/调试信息/偏移，只比 opcode 序列，详见 `dex-diff` skill。
+
 ### 写回变换（unlock / replace / strip-debug / patch / callgraph）
 
 这组命令**读入 dex → 变换 → 写出新 dex**（`-o` 默认 `out.dex`，原文件不改），详见 `dex-transform` skill。
@@ -183,12 +192,13 @@ dependencies {
 
 ## Skills 索引
 
-23 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
+24 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
 按能力分组：
 
 - **读取/结构**：`dex-read`、`dex-list-structure`、`dex-list-classes`、`dex-list-methods`、
   `dex-list-strings`、`dex-multidex`
 - **查询**：`dex-xref`（交叉引用）、`dex-search`（指令模式搜索）
+- **比较**：`dex-diff`（两个 dex/apk 的语义差异）
 - **写回变换**：`dex-transform`（unlock/replace/strip-debug/patch/callgraph）
 - **编辑器**：`smali-lsp`（LSP 语言服务器：诊断/大纲/悬浮）
 - **转换**：`dex-disassemble`、`dex-assemble`、`dex-roundtrip`、`dex-build`

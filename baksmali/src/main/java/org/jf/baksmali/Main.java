@@ -93,6 +93,7 @@ public class Main extends Command {
         ExtendedCommands.addExtendedCommand(jc, new StripDebugCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new CallGraphCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new PatchCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new DiffCommand(commandHierarchy));
 
         jc.parse(args);
 
