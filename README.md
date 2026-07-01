@@ -53,6 +53,30 @@ scripts/baksmali disassemble ...     # 等价于 java -jar baksmali/build/libs/b
 
 需要 Java 8+（源码目标）与 Java 11（推荐用于构建，CI 使用 Java 11）。
 
+### Docker（免装 JDK）
+
+无需本地安装 JDK/Gradle，直接用容器运行：
+
+```bash
+# 拉取预构建镜像
+docker pull ghcr.io/android-security-engineer/smali-skills:latest
+
+# 反汇编（把当前目录挂进容器 /work）
+docker run --rm -v "$PWD:/work" ghcr.io/android-security-engineer/smali-skills:latest \
+  disassemble app.apk -o out/
+
+# 汇编（切到 smali 入口）
+docker run --rm -v "$PWD:/work" ghcr.io/android-security-engineer/smali-skills:latest \
+  smali assemble out/ -o app.dex
+
+# 查询（xref / search / list）
+docker run --rm -v "$PWD:/work" ghcr.io/android-security-engineer/smali-skills:latest \
+  xref callers app.apk --target 'Lcom/Example;->foo()V'
+```
+
+镜像 ENTRYPOINT 默认是 `baksmali`；如需 `smali`，把 `smali` 作为第一个参数（镜像内已装
+`smali`/`baksmali` 两个包装脚本）。本地构建镜像：`docker build -t smali-skills .`。
+
 ## CLI 速查
 
 ### 转换（smali ⇄ dex）

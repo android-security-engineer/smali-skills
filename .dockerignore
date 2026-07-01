@@ -1,0 +1,15 @@
+# Build artifacts
+**/build/
+.gradle/
+gradle/wrapper/gradle-wrapper.jar.tmp
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+
+# Test outputs
+**/build/reports/
+
+# Local dex outputs from examples
+out/
