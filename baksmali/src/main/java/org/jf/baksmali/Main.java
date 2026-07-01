@@ -94,6 +94,7 @@ public class Main extends Command {
         ExtendedCommands.addExtendedCommand(jc, new CallGraphCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new PatchCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new DiffCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new FingerprintCommand(commandHierarchy));
 
         jc.parse(args);
 

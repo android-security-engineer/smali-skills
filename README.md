@@ -144,6 +144,16 @@ baksmali diff old.apk new.apk --format json   # 机器可读；退出码 0=一�
 
 忽略寄存器分配/调试信息/偏移，只比 opcode 序列，详见 `dex-diff` skill。
 
+### 指纹 / 库识别（fingerprint）—— 对重命名不敏感
+
+```bash
+baksmali fingerprint app.apk                          # 每个类一个 opcode 指纹哈希
+baksmali fingerprint app.apk --level method           # 细到方法
+baksmali fingerprint app.apk --match okhttp.dex --min-similarity 0.9   # 认出被混淆的库
+```
+
+基于 opcode 序列，改名/换寄存器不改变指纹；`--match` 用 n-gram 相似度做库/克隆识别，详见 `dex-fingerprint` skill。
+
 ### 写回变换（unlock / replace / strip-debug / patch / callgraph）
 
 这组命令**读入 dex → 变换 → 写出新 dex**（`-o` 默认 `out.dex`，原文件不改），详见 `dex-transform` skill。
@@ -192,13 +202,14 @@ dependencies {
 
 ## Skills 索引
 
-24 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
+25 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
 按能力分组：
 
 - **读取/结构**：`dex-read`、`dex-list-structure`、`dex-list-classes`、`dex-list-methods`、
   `dex-list-strings`、`dex-multidex`
 - **查询**：`dex-xref`（交叉引用）、`dex-search`（指令模式搜索）
 - **比较**：`dex-diff`（两个 dex/apk 的语义差异）
+- **指纹**：`dex-fingerprint`（opcode 指纹、库/克隆识别）
 - **写回变换**：`dex-transform`（unlock/replace/strip-debug/patch/callgraph）
 - **编辑器**：`smali-lsp`（LSP 语言服务器：诊断/大纲/悬浮）
 - **转换**：`dex-disassemble`、`dex-assemble`、`dex-roundtrip`、`dex-build`

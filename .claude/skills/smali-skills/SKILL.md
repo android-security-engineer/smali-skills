@@ -201,6 +201,7 @@ java -jar baksmali.jar <子命令> [选项] <输入文件>
 | `xref` | — | 反向交叉引用（callers/field-refs/type-refs），见 `dex-xref` |
 | `search` | `find` | 指令模式搜索（--opcode/--class/--method），见 `dex-search` |
 | `diff` | — | 两个 dex/apk 的语义（opcode 级）差异，见 `dex-diff` |
+| `fingerprint` | `fp` | opcode 指纹与库/克隆识别，见 `dex-fingerprint` |
 | `unlock` | — | 批量改访问标志（publicize/definalize），见 `dex-transform` |
 | `replace` | — | 批量替换字符串常量，见 `dex-transform` |
 | `strip-debug` | — | 清除全部调试信息，见 `dex-transform` |
