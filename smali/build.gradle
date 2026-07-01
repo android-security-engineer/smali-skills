@@ -88,12 +88,21 @@ dependencies {
 processResources.inputs.property('version', version)
 processResources.expand('version': version)
 
+// The main resources include the ANTLR-generated .tokens files (see the
+// sourceSets block above), so processResources must run after the grammar is
+// generated. Gradle 8 promotes this implicit dependency to a hard error.
+processResources.dependsOn generateGrammarSource
+
 // Build a separate jar that contains all dependencies
-task fatJar(type: Jar, dependsOn: jar) {
+// Gradle 8 no longer wires the upstream project jars as implicit dependencies
+// of the `from { runtimeClasspath.collect { zipTree } }` closure, so declare
+// them explicitly. Otherwise the fat jar can be assembled before dexlib2/util
+// jars exist.
+task fatJar(type: Jar, dependsOn: [jar, ':dexlib2:jar', ':util:jar']) {
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
-    classifier = 'fat'
+    archiveClassifier = 'fat'
 
     manifest {
         attributes('Main-Class': 'org.jf.smali.Main')
@@ -101,7 +110,7 @@ task fatJar(type: Jar, dependsOn: jar) {
 
     doLast {
         if (!System.getProperty('os.name').toLowerCase().contains('windows')) {
-            ant.symlink(link: file("${destinationDirectory.get()}/smali.jar"), resource: archivePath, overwrite: true)
+            ant.symlink(link: file("${destinationDirectory.get()}/smali.jar"), resource: archiveFile.get().asFile, overwrite: true)
         }
     }
 }
@@ -160,6 +169,9 @@ task proguard(type: proguard.gradle.ProGuardTask, dependsOn: fatJar) {
 
 sourcesJar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    // The sources jar bundles the generated ANTLR + JFlex sources, so it must
+    // run after those generators (Gradle 8 hard-fails on the implicit edge).
+    dependsOn generateGrammarSource, 'jflex'
 }
 
 tasks.getByPath(':release').dependsOn(proguard)

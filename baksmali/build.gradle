@@ -54,11 +54,12 @@ processResources.inputs.property('version', version)
 processResources.expand('version': version)
 
 // Build a separate jar that contains all dependencies
-task fatJar(type: Jar) {
+// See the smali fatJar note: declare upstream jars explicitly for Gradle 8.
+task fatJar(type: Jar, dependsOn: [jar, ':dexlib2:jar', ':util:jar']) {
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
-    classifier = 'fat'
+    archiveClassifier = 'fat'
 
     manifest {
         attributes('Main-Class': 'org.jf.baksmali.Main')
@@ -66,7 +67,7 @@ task fatJar(type: Jar) {
 
     doLast {
         if (!System.getProperty('os.name').toLowerCase().contains('windows')) {
-            ant.symlink(link: file("${destinationDirectory.get()}/baksmali.jar"), resource: archivePath, overwrite: true)
+            ant.symlink(link: file("${destinationDirectory.get()}/baksmali.jar"), resource: archiveFile.get().asFile, overwrite: true)
         }
     }
 }

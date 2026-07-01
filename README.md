@@ -182,7 +182,7 @@ dependencies {
 
 - `upstream` 远程跟踪原版；`.github/workflows/sync-upstream.yml` 自动同步上游变更。
 - 所有增强均为**纯加法**，不改动既有命令的默认行为（`--format` 默认 `text`，向后兼容）。
-- CI（`.github/workflows/ci.yml`）在 Java 11 + Gradle 6.8.2 上构建并测试。
+- CI（`.github/workflows/ci.yml`）在 Java 11 + Gradle 8.14 上构建并测试。
 - Release 工作流（`.github/workflows/release.yml`）在打 tag 时构建并发布 fat jar。
 
 ## 构建/测试

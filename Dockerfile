@@ -3,10 +3,10 @@
 # Stage 2 copies just the fat jars into a minimal JRE image for runtime.
 
 # ---------- build stage ----------
-# Use a Gradle 7.6.4 image (cached) to build. The project's wrapper is 6.8.2,
-# but we invoke the image's gradle directly to avoid downloading the wrapper
-# distribution inside the image.
-FROM gradle:7.6.4-jdk11 AS builder
+# Use a Gradle 8.14 image matching the project's wrapper version. We invoke the
+# image's gradle directly to avoid downloading the wrapper distribution inside
+# the image.
+FROM gradle:8.14-jdk17 AS builder
 
 WORKDIR /build
 
@@ -31,11 +31,8 @@ COPY dexlib2 ./dexlib2
 COPY smali ./smali
 COPY baksmali ./baksmali
 
-# Build fat jars. We build the upstream project jars (util/dexlib2) explicitly
-# first, because the fatJar task collects runtimeClasspath as zip trees and
-# needs those jars to already exist (Gradle 7 does not auto-wire them as task
-# dependencies for this legacy build script).
-RUN gradle --no-daemon :util:jar :dexlib2:jar :smali:generateGrammarSource :smali:jflex -x test -x javadoc -x check
+# Build fat jars. The fatJar tasks now declare explicit dependsOn for the
+# upstream util/dexlib2 jars, so a single invocation is enough.
 RUN gradle --no-daemon :smali:fatJar :baksmali:fatJar -x test -x javadoc -x check
 
 # ---------- runtime stage ----------
