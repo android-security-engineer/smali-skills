@@ -69,7 +69,7 @@ jobs:
           cp "$UTIL_JAR" release-assets/util.jar
 
           # Copy skills
-          cp -r .claude/skills release-assets/skills
+          cp -r skills release-assets/skills
 
           # Create install script
           cat > release-assets/install.sh << 'INSTALL_EOF'

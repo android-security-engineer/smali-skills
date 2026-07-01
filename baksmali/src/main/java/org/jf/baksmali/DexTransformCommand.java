@@ -33,6 +33,9 @@ package org.jf.baksmali;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+import com.google.gson.JsonObject;
+import org.jf.baksmali.output.TransformReport;
 import org.jf.dexlib2.iface.DexFile;
 import org.jf.dexlib2.writer.pool.DexPool;
 import org.jf.util.jcommander.ExtendedParameter;
@@ -57,6 +60,9 @@ public abstract class DexTransformCommand extends DexInputCommand {
     @ExtendedParameter(argumentNames = "file")
     protected String output = "out.dex";
 
+    @ParametersDelegate
+    protected final OutputFormatArguments outputFormatArguments = new OutputFormatArguments();
+
     public DexTransformCommand(@Nonnull List<JCommander> commandAncestors) {
         super(commandAncestors);
     }
@@ -70,5 +76,15 @@ public abstract class DexTransformCommand extends DexInputCommand {
         } catch (IOException ex) {
             throw new RuntimeException("Failed to write output dex: " + output, ex);
         }
+    }
+
+    /**
+     * Prints the one-line success report for a transform. In the default JSON mode {@code report}
+     * is serialized; with {@code --format text} the {@code humanText} sentence is printed instead.
+     * The {@code command}/{@code input}/{@code output} common fields should already be seeded via
+     * {@link TransformReport#base(String, String, String)}.
+     */
+    protected void emitReport(@Nonnull JsonObject report, @Nonnull String humanText) {
+        System.out.println(TransformReport.render(outputFormatArguments.isJson(), report, humanText));
     }
 }

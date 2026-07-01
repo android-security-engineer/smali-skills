@@ -1,0 +1,17 @@
+{
+  "name": "smali-skills",
+  "owner": {
+    "name": "Android Security Engineer",
+    "url": "https://github.com/android-security-engineer"
+  },
+  "description": "AI-oriented Dalvik/dex reverse-engineering toolkit: baksmali/smali + dexlib2 with JSON-by-default query, xref, search, diff, fingerprint, transforms, LSP and MCP — plus progressive-disclosure Skills.",
+  "homepage": "https://github.com/android-security-engineer/smali-skills",
+  "plugins": [
+    {
+      "name": "smali-skills",
+      "source": "./",
+      "description": "Assemble/disassemble/analyze/transform Android dex. Skills wrap the baksmali/smali CLIs (JSON output by default) for AI agents.",
+      "version": "2.5.2"
+    }
+  ]
+}

@@ -34,6 +34,9 @@ package org.jf.baksmali;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.jf.baksmali.output.TransformReport;
 import org.jf.baksmali.transform.StringReplaceTransform;
 import org.jf.dexlib2.iface.DexFile;
 import org.jf.util.jcommander.ExtendedParameter;
@@ -115,21 +118,39 @@ public class ReplaceCommand extends DexTransformCommand {
         }
 
         // Pair replacements to sources: literal --from rules first, then --regex rules, each in the
-        // order given. --to values are consumed in the same order.
+        // order given. --to values are consumed in the same order. The JSON rules array is built in
+        // the same pass so it mirrors the exact rules that get applied.
         List<StringReplaceTransform.Rule> rules = new ArrayList<>();
+        JsonArray ruleReport = new JsonArray();
         int toIndex = 0;
         for (String literal : from) {
-            rules.add(StringReplaceTransform.Rule.literal(literal, to.get(toIndex++)));
+            String replacement = to.get(toIndex++);
+            rules.add(StringReplaceTransform.Rule.literal(literal, replacement));
+            ruleReport.add(ruleObject("literal", literal, replacement));
         }
         for (String pattern : regex) {
-            rules.add(StringReplaceTransform.Rule.regex(pattern, to.get(toIndex++)));
+            String replacement = to.get(toIndex++);
+            rules.add(StringReplaceTransform.Rule.regex(pattern, replacement));
+            ruleReport.add(ruleObject("regex", pattern, replacement));
         }
 
-        loadDexFile(inputList.get(0));
+        String input = inputList.get(0);
+        loadDexFile(input);
 
         DexFile result = new StringReplaceTransform(rules).apply(dexFile);
         writeResult(result);
 
-        System.out.println("Wrote " + output + " (" + rules.size() + " replacement rule(s) applied).");
+        JsonObject report = TransformReport.base("replace", input, output);
+        report.addProperty("rules", rules.size());
+        report.add("ruleDetails", ruleReport);
+        emitReport(report, "Wrote " + output + " (" + rules.size() + " replacement rule(s) applied).");
+    }
+
+    private static JsonObject ruleObject(@Nonnull String type, @Nonnull String from, @Nonnull String to) {
+        JsonObject o = new JsonObject();
+        o.addProperty("type", type);
+        o.addProperty("from", from);
+        o.addProperty("to", to);
+        return o;
     }
 }

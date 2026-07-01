@@ -39,8 +39,8 @@ import com.beust.jcommander.ParametersDelegate;
  *
  * <p>Commands that produce tabular or enumerated output can delegate to this class via
  * {@code @ParametersDelegate} to gain a {@code --format} option that switches between
- * human-readable text (the default, preserving backward compatibility) and machine-readable
- * JSON (for AI Agent consumption).
+ * machine-readable JSON (the default, for AI Agent / scripting consumption) and
+ * human-readable text (opt in with {@code --format text}).
  */
 public class OutputFormatArguments {
 
@@ -50,21 +50,23 @@ public class OutputFormatArguments {
     }
 
     @Parameter(names = {"--format"},
-            description = "Output format: 'text' (default, human-readable) or 'json' (machine-readable, for scripting/AI agents).")
-    private String format = "text";
+            description = "Output format: 'json' (default, machine-readable, for scripting/AI agents) or 'text' (human-readable).")
+    private String format = "json";
 
     /**
-     * @return the parsed output format, defaulting to {@link Format#TEXT} for unrecognized values.
+     * @return the parsed output format. Defaults to {@link Format#JSON}; only an explicit
+     * {@code text} selects {@link Format#TEXT} (unrecognized values fall back to JSON, matching
+     * the default).
      */
     public Format getFormat() {
         if (format == null) {
-            return Format.TEXT;
+            return Format.JSON;
         }
         switch (format.toLowerCase()) {
-            case "json":
-                return Format.JSON;
-            default:
+            case "text":
                 return Format.TEXT;
+            default:
+                return Format.JSON;
         }
     }
 

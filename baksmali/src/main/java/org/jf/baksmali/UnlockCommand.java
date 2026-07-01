@@ -34,6 +34,8 @@ package org.jf.baksmali;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.gson.JsonObject;
+import org.jf.baksmali.output.TransformReport;
 import org.jf.baksmali.transform.AccessFlagTransform;
 import org.jf.dexlib2.iface.DexFile;
 import org.jf.util.jcommander.ExtendedParameters;
@@ -99,14 +101,19 @@ public class UnlockCommand extends DexTransformCommand {
             doFinal = true;
         }
 
-        loadDexFile(inputList.get(0));
+        String input = inputList.get(0);
+        loadDexFile(input);
 
         DexFile result = new AccessFlagTransform(doPublic, doFinal).apply(dexFile);
         writeResult(result);
 
-        System.out.println("Wrote " + output + " (" +
+        JsonObject report = TransformReport.base("unlock", input, output);
+        report.addProperty("publicized", doPublic);
+        report.addProperty("definalized", doFinal);
+        String humanText = "Wrote " + output + " (" +
                 (doPublic ? "publicized" : "") +
                 (doPublic && doFinal ? ", " : "") +
-                (doFinal ? "definalized" : "") + ").");
+                (doFinal ? "definalized" : "") + ").";
+        emitReport(report, humanText);
     }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "smali-skills",
+  "version": "2.5.2",
+  "description": "AI-oriented Dalvik/dex reverse-engineering toolkit. Skills wrap the baksmali/smali CLIs and dexlib2 for assembling, disassembling, analyzing (xref/search/diff/fingerprint), and transforming (unlock/replace/strip-debug/patch) Android dex — JSON output by default for agent consumption.",
+  "author": {
+    "name": "Android Security Engineer",
+    "email": "joan_scott2015@sent.com"
+  },
+  "homepage": "https://github.com/android-security-engineer/smali-skills",
+  "repository": "https://github.com/android-security-engineer/smali-skills",
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "android",
+    "dex",
+    "apk",
+    "smali",
+    "baksmali",
+    "dalvik",
+    "reverse-engineering",
+    "bytecode",
+    "security",
+    "dexlib2"
+  ]
+}

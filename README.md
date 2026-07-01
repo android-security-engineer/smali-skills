@@ -13,7 +13,7 @@ smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发�
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Layer 3 · Skills（渐进式披露 Markdown，面向 AI Agent）       │
-│  .claude/skills/*/SKILL.md  ——  27 个细粒度技能 + 索引        │
+│  skills/*/SKILL.md  ——  27 个细粒度技能 + 索引               │
 ├─────────────────────────────────────────────────────────────┤
 │  Layer 2 · CLI（展示/查询层，本仓库增强重点）                 │
 │  baksmali:  disassemble / list / xref / search / diff /      │
@@ -53,6 +53,26 @@ scripts/baksmali disassemble ...     # 等价于 java -jar baksmali/build/libs/b
 ```
 
 需要 Java 8+（源码目标）与 Java 11（推荐用于构建，CI 使用 Java 11）。
+
+### Claude Code 插件（marketplace）
+
+本仓库同时是一个 **Claude Code 插件 + marketplace**（`.claude-plugin/marketplace.json` +
+`.claude-plugin/plugin.json`），27 个技能会从 `skills/*/SKILL.md` 自动发现。在 Claude Code 中：
+
+```
+/plugin marketplace add android-security-engineer/smali-skills
+/plugin install smali-skills@smali-skills
+```
+
+安装后，技能以 `/smali-skills:<skill>` 形式调用，例如：
+
+```
+/smali-skills:dex-xref
+/smali-skills:dex-search
+/smali-skills:dex-disassemble
+```
+
+插件仅提供 Skills 文档层；实际执行仍调用构建出的 `baksmali.jar`/`smali.jar`（见上文安装）。
 
 ### Homebrew（macOS / Linux）
 
@@ -177,7 +197,7 @@ java -jar smali/build/libs/smali.jar lsp     # 供编辑器客户端拉起
 scripts/smali-lsp                            # 或用包装脚本（自动定位 smali.jar）
 ```
 
-接入示例（Neovim / VS Code）与协议细节见 [`.claude/skills/smali-lsp/SKILL.md`](.claude/skills/smali-lsp/SKILL.md)。
+接入示例（Neovim / VS Code）与协议细节见 [`skills/smali-lsp/SKILL.md`](skills/smali-lsp/SKILL.md)。
 
 ### AI Agent 集成（baksmali mcp）
 
@@ -190,7 +210,7 @@ java -jar baksmali/build/libs/baksmali.jar mcp     # 供 MCP 宿主拉起
 ```
 
 待查的 dex/apk 不在命令行给，而是每次 `tools/call` 用 `input` 参数传路径。Claude Desktop 接入
-示例与协议细节见 [`.claude/skills/smali-mcp/SKILL.md`](.claude/skills/smali-mcp/SKILL.md)。
+示例与协议细节见 [`skills/smali-mcp/SKILL.md`](skills/smali-mcp/SKILL.md)。
 
 ### 格式化 / 风格检查（smali format / lint）
 
@@ -206,7 +226,7 @@ java -jar smali/build/libs/smali.jar lint --format json out/ # 风格报告（te
 ```
 
 编辑器里的"Format Document"复用同一 formatter（`smali lsp` 已通告 `documentFormattingProvider`）。
-规则表与缩进模型见 [`.claude/skills/smali-format/SKILL.md`](.claude/skills/smali-format/SKILL.md)。
+规则表与缩进模型见 [`skills/smali-format/SKILL.md`](skills/smali-format/SKILL.md)。
 
 ## 作为库依赖（dexlib2）
 
@@ -232,7 +252,7 @@ dependencies {
 
 ## Skills 索引
 
-27 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
+27 个技能位于 `skills/`，索引见 [`skills/smali-skills/SKILL.md`](skills/smali-skills/SKILL.md)。
 按能力分组：
 
 - **读取/结构**：`dex-read`、`dex-list-structure`、`dex-list-classes`、`dex-list-methods`、
@@ -260,7 +280,8 @@ dependencies {
 本仓库是 [JesusFreke/smali](https://github.com/JesusFreke/smali) 的 fork：
 
 - `upstream` 远程跟踪原版；`.github/workflows/sync-upstream.yml` 自动同步上游变更。
-- 所有增强均为**纯加法**，不改动既有命令的默认行为（`--format` 默认 `text`，向后兼容）。
+- 所有增强均为**纯加法**（不改动 `disassemble`/`assemble` 等既有命令）；查询类命令（`list`/`xref`/
+  `search`/`diff`/`fingerprint`）**默认输出 JSON**（面向 AI Agent / 脚本消费），人读文本用 `--format text` 显式切换。
 - CI（`.github/workflows/ci.yml`）在 Java 11 + Gradle 8.14 上构建并测试。
 - Release 工作流（`.github/workflows/release.yml`）在打 tag 时构建并发布 fat jar。
 

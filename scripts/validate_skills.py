@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validates the Skills layer under .claude/skills/.
+Validates the Skills layer under skills/.
 
 Checks performed for every SKILL.md:
   1. It has a YAML frontmatter block delimited by '---'.
@@ -16,7 +16,7 @@ import os
 import re
 import sys
 
-SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", ".claude", "skills")
+SKILLS_DIR = os.path.join(os.path.dirname(__file__), "..", "skills")
 SKILLS_DIR = os.path.abspath(SKILLS_DIR)
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)

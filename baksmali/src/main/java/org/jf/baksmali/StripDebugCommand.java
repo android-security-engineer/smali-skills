@@ -34,6 +34,8 @@ package org.jf.baksmali;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.gson.JsonObject;
+import org.jf.baksmali.output.TransformReport;
 import org.jf.baksmali.transform.StripDebugTransform;
 import org.jf.dexlib2.iface.DexFile;
 import org.jf.util.jcommander.ExtendedParameters;
@@ -74,11 +76,14 @@ public class StripDebugCommand extends DexTransformCommand {
             return;
         }
 
-        loadDexFile(inputList.get(0));
+        String input = inputList.get(0);
+        loadDexFile(input);
 
         DexFile result = new StripDebugTransform().apply(dexFile);
         writeResult(result);
 
-        System.out.println("Wrote " + output + " (debug info stripped).");
+        JsonObject report = TransformReport.base("strip-debug", input, output);
+        report.addProperty("strippedDebugInfo", true);
+        emitReport(report, "Wrote " + output + " (debug info stripped).");
     }
 }
