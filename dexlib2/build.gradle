@@ -46,7 +46,7 @@ configurations {
 }
 
 dependencies {
-    implementation depends.findbugs
+    implementation depends.jsr305
     implementation depends.guava
 
     testImplementation depends.junit
