@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Copyright (C) 2024 the smali-skills fork.
+#
+# Licensed under the BSD 3-Clause License.
+#
+# Thin wrapper that starts the smali Language Server (LSP over stdio) by
+# invoking `smali lsp`. Editors/IDE clients launch this script and speak
+# Content-Length-framed JSON-RPC over its stdin/stdout.
+#
+# It resolves smali.jar relative to this script (following symlinks), matching
+# the sibling `scripts/smali` wrapper.
+
+# Set up prog to be the path of this script, including following symlinks,
+# and set up progdir to be the fully-qualified pathname of its directory.
+prog="$0"
+while [ -h "${prog}" ]; do
+    newProg=`/bin/ls -ld "${prog}"`
+    newProg=`expr "${newProg}" : ".* -> \(.*\)$"`
+    if expr "x${newProg}" : 'x/' >/dev/null; then
+        prog="${newProg}"
+    else
+        progdir=`dirname "${prog}"`
+        prog="${progdir}/${newProg}"
+    fi
+done
+oldwd=`pwd`
+progdir=`dirname "${prog}"`
+cd "${progdir}"
+progdir=`pwd`
+prog="${progdir}"/`basename "${prog}"`
+cd "${oldwd}"
+
+jarfile=smali.jar
+libdir="$progdir"
+if [ ! -r "$libdir/$jarfile" ]
+then
+    echo `basename "$prog"`": can't find $jarfile" >&2
+    exit 1
+fi
+
+javaOpts="-Xmx512M"
+
+# Extract any leading "-Jxxx" options and pass them to the JVM.
+while expr "x$1" : 'x-J' >/dev/null; do
+    opt=`expr "$1" : '-J\(.*\)'`
+    javaOpts="${javaOpts} -${opt}"
+    shift
+done
+
+if [ "$OSTYPE" = "cygwin" ] ; then
+    jarpath=`cygpath -w  "$libdir/$jarfile"`
+else
+    jarpath="$libdir/$jarfile"
+fi
+
+exec java $javaOpts -jar "$jarpath" lsp "$@"

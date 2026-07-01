@@ -88,6 +88,7 @@ java -jar $BAKSMALI_JAR disassemble -o out app.apk
 | 结构化输出（JSON/计数） | `dex-list-methods` | `java -jar baksmali.jar l m --format json app.apk` |
 | 谁调用了某方法 | `dex-xref` | `java -jar baksmali.jar xref callers --target "Lc;->foo()V" app.apk` |
 | 搜索指令序列 | `dex-search` | `java -jar baksmali.jar search --opcode const-string,invoke-virtual app.apk` |
+| 在编辑器中获得 smali 诊断/大纲/悬浮 | `smali-lsp` | `java -jar smali.jar lsp`（LSP over stdio） |
 | 反汇编→修改→重汇编 | `dex-roundtrip` | 见完整工作流 |
 
 ### 🟡 进阶操作 — 分析与变换
@@ -108,6 +109,7 @@ java -jar $BAKSMALI_JAR disassemble -o out app.apk
 | 查看二进制结构 | `dex-dump` | 带注释的十六进制转储 |
 | dex 结构信息（vtable/偏移/依赖） | `dex-list-structure` | 虚方法表、字段偏移、odex 依赖 |
 | smali 语法参考 | `smali-syntax` | 指令、指令、类型描述符 |
+| smali 语言服务器（编辑器集成） | `smali-lsp` | 诊断、文档符号大纲、opcode 悬浮文档 |
 | 用 dexlib2 读取 dex | `dex-read` | 加载/遍历 dex 数据模型 |
 | 用 dexlib2 构建 dex | `dex-build` | 从零构建 dex 文件 |
 | 指令类型与 Opcode 版本 | `dex-instructions` | 指令接口、格式、版本映射 |

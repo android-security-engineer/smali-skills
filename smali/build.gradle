@@ -79,6 +79,9 @@ dependencies {
     implementation depends.jcommander
     implementation depends.stringtemplate
     implementation depends.guava
+    // Gson powers the hand-rolled JSON-RPC framing in the smali language server
+    // (org.jf.smali.lsp). Reusing the existing dependency avoids pulling in LSP4J.
+    implementation depends.gson
 
     testImplementation depends.junit
 

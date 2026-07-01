@@ -13,11 +13,11 @@ smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发�
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Layer 3 · Skills（渐进式披露 Markdown，面向 AI Agent）       │
-│  .claude/skills/*/SKILL.md  ——  21 个细粒度技能 + 索引        │
+│  .claude/skills/*/SKILL.md  ——  22 个细粒度技能 + 索引        │
 ├─────────────────────────────────────────────────────────────┤
 │  Layer 2 · CLI（展示/查询层，本仓库增强重点）                 │
 │  baksmali:  disassemble / list / xref / search / dump        │
-│  smali:     assemble                                         │
+│  smali:     assemble / lsp（语言服务器）                     │
 ├─────────────────────────────────────────────────────────────┤
 │  Layer 1 · dexlib2（核心库，转换引擎）                        │
 │  iface / dexbacked / immutable / builder / writer / analysis │
@@ -28,7 +28,7 @@ smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发�
   deodex 类型推断。本仓库扩展了版本映射至 dex 040 / API 30+。
 - **Layer 2（CLI）**：原版只有纯文本转换输出，Agent 必须正则解析。本仓库新增 `--format json`、
   `xref`、`search`、`--count`/`--group-by`，让 Agent 能直接消费结构化结果。
-- **Layer 3（Skills）**：21 个 SKILL.md，按「快速开始 / 进阶 / 专家」三层渐进披露，覆盖
+- **Layer 3（Skills）**：22 个 SKILL.md，按「快速开始 / 进阶 / 专家」三层渐进披露，覆盖
   每个 CLI 能力与 dexlib2 用法，供 Agent 按需加载。
 
 ## 安装
@@ -135,6 +135,18 @@ baksmali search app.apk --class 'Lcom/.*' --method onCreate          # 类/方�
 baksmali search app.apk --opcode invoke-virtual --format json
 ```
 
+### 编辑器集成（smali lsp）
+
+`smali.jar` 内置一个 **Language Server**（LSP over stdio，JSON-RPC）。编辑器/IDE 接入后可获得
+实时诊断、类/方法/字段大纲、opcode 悬浮文档——无第三方依赖（在已有 Gson 上手写协议）。
+
+```bash
+java -jar smali/build/libs/smali.jar lsp     # 供编辑器客户端拉起
+scripts/smali-lsp                            # 或用包装脚本（自动定位 smali.jar）
+```
+
+接入示例（Neovim / VS Code）与协议细节见 [`.claude/skills/smali-lsp/SKILL.md`](.claude/skills/smali-lsp/SKILL.md)。
+
 ## 作为库依赖（dexlib2）
 
 Layer 1 的 dexlib2/util 发布到 Maven Central（命名空间 `io.github.android-security-engineer`）：
@@ -159,12 +171,13 @@ dependencies {
 
 ## Skills 索引
 
-21 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
+22 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
 按能力分组：
 
 - **读取/结构**：`dex-read`、`dex-list-structure`、`dex-list-classes`、`dex-list-methods`、
   `dex-list-strings`、`dex-multidex`
 - **查询**：`dex-xref`（交叉引用）、`dex-search`（指令模式搜索）
+- **编辑器**：`smali-lsp`（LSP 语言服务器：诊断/大纲/悬浮）
 - **转换**：`dex-disassemble`、`dex-assemble`、`dex-roundtrip`、`dex-build`
 - **分析**：`dex-dump`、`dex-analyze`、`dex-instructions`、`dex-classpath`、`dex-deodex`
 - **改写**：`dex-rewrite-references`、`dex-rewrite-structure`

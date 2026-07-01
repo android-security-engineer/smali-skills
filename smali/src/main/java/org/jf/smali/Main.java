@@ -82,6 +82,7 @@ public class Main extends Command {
 
         ExtendedCommands.addExtendedCommand(jc, new AssembleCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new PrintTokensCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new LspCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new HelpCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new HlepCommand(commandHierarchy));
 
