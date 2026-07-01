@@ -194,3 +194,33 @@ jobs:
             release-assets/install.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew tap
+        if: ${{ env.HOMEBREW_TAP_TOKEN != '' }}
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -e
+          BAKSMALI_SHA=$(sha256sum release-assets/baksmali.jar | cut -d' ' -f1)
+          SMALI_SHA=$(sha256sum release-assets/smali.jar | cut -d' ' -f1)
+
+          # Regenerate the formula from the committed template.
+          FORMULA=packaging/homebrew/smali-skills.rb
+          sed \
+            -e "s/^  version \".*\"/  version \"${VERSION}\"/" \
+            -e "s/url \"https:\/\/github.com\/android-security-engineer\/smali-skills\/releases\/download\/v2.5.2\/smali.jar\"/url \"https:\/\/github.com\/android-security-engineer\/smali-skills\/releases\/download\/v${VERSION}\/smali.jar\"/" \
+            -e "s/REPLACE_WITH_BAKSMALI_SHA256/${BAKSMALI_SHA}/" \
+            -e "s/REPLACE_WITH_SMALI_SHA256/${SMALI_SHA}/" \
+            "$FORMULA" > /tmp/smali-skills.rb
+
+          # Clone the tap and push the updated formula.
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/android-security-engineer/homebrew-tap.git" /tmp/tap
+          mkdir -p /tmp/tap/Formula
+          cp /tmp/smali-skills.rb /tmp/tap/Formula/smali-skills.rb
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/smali-skills.rb
+          git commit -m "smali-skills ${VERSION}" || echo "no changes"
+          git push

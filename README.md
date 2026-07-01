@@ -53,6 +53,18 @@ scripts/baksmali disassemble ...     # 等价于 java -jar baksmali/build/libs/b
 
 需要 Java 8+（源码目标）与 Java 11（推荐用于构建，CI 使用 Java 11）。
 
+### Homebrew（macOS / Linux）
+
+```bash
+brew tap android-security-engineer/tap
+brew install smali-skills
+# 之后可直接用 smali / baksmali 命令
+baksmali list strings app.apk
+```
+
+Formula 见 [`packaging/homebrew/smali-skills.rb`](packaging/homebrew/smali-skills.rb)；
+release 工作流会在每次打 tag 时自动回填版本号与 sha256 并推送到 tap 仓库。
+
 ### Docker（免装 JDK）
 
 无需本地安装 JDK/Gradle，直接用容器运行：
