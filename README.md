@@ -135,6 +135,28 @@ baksmali search app.apk --class 'Lcom/.*' --method onCreate          # 类/方�
 baksmali search app.apk --opcode invoke-virtual --format json
 ```
 
+## 作为库依赖（dexlib2）
+
+Layer 1 的 dexlib2/util 发布到 Maven Central（命名空间 `io.github.android-security-engineer`）：
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("io.github.android-security-engineer:dexlib2:2.5.2")
+}
+```
+
+```xml
+<!-- pom.xml -->
+<dependency>
+  <groupId>io.github.android-security-engineer</groupId>
+  <artifactId>dexlib2</artifactId>
+  <version>2.5.2</version>
+</dependency>
+```
+
+发布流程见 [`packaging/PUBLISHING.md`](packaging/PUBLISHING.md)。
+
 ## Skills 索引
 
 21 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。

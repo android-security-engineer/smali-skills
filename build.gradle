@@ -115,7 +115,11 @@ subprojects {
         apply plugin: 'maven-publish'
         apply plugin: 'signing'
 
-        group = 'org.smali'
+        // Publishing coordinates. This fork publishes under its own,
+        // GitHub-verifiable namespace by default (io.github.<org>), so it does
+        // not collide with the upstream org.smali artifacts. Override with
+        // -PmavenGroup=... if you own a different namespace.
+        group = project.findProperty('mavenGroup') ?: 'io.github.android-security-engineer'
 
         publishing {
             publications {
@@ -133,7 +137,8 @@ subprojects {
 
                     pom {
                         name = project.name
-                        url = 'http://smali.org'
+                        description = 'AI-Agent-oriented smali/baksmali fork: dex assembler/disassembler + query layer (JSON/xref/search)'
+                        url = 'https://github.com/android-security-engineer/smali-skills'
 
                         licenses {
                             license {
@@ -143,14 +148,22 @@ subprojects {
                             }
                         }
                         scm {
-                            connection = 'scm:git:git://github.com/JesusFreke/smali.git'
-                            developerConnection = 'scm:git:git@github.com:JesusFreke/smali.git'
+                            connection = 'scm:git:git://github.com/android-security-engineer/smali-skills.git'
+                            developerConnection = 'scm:git:git@github.com:android-security-engineer/smali-skills.git'
+                            url = 'https://github.com/android-security-engineer/smali-skills'
                         }
                         developers {
                             developer {
                                 id = 'jesusfreke'
                                 name = 'Ben Gruver'
                                 email = 'jesusfreke@jesusfreke.com'
+                                roles = ['Original author of smali/baksmali']
+                            }
+                            developer {
+                                id = 'android-security-engineer'
+                                name = 'android-security-engineer'
+                                url = 'https://github.com/android-security-engineer'
+                                roles = ['Maintainer of the smali-skills fork']
                             }
                         }
                     }
@@ -159,7 +172,11 @@ subprojects {
             if (rootProject.hasProperty('sonatypeUsername') && rootProject.hasProperty('sonatypePassword')) {
                 repositories {
                     maven {
-                        url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+                        // Sonatype Central Portal OSSRH-compatible staging API.
+                        // The legacy oss.sonatype.org endpoint was sunset in 2025;
+                        // the Central Portal accepts staged deploys at this URL.
+                        name = 'centralPortal'
+                        url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
                         credentials {
                             username sonatypeUsername
                             password sonatypePassword
@@ -171,6 +188,14 @@ subprojects {
 
         signing {
             required { gradle.taskGraph.hasTask('publish') }
+            // In CI, supply an ASCII-armored key + passphrase via
+            // ORG_GRADLE_PROJECT_signingKey / ORG_GRADLE_PROJECT_signingPassword
+            // (Gradle maps these to the `signingKey`/`signingPassword` props).
+            def signingKey = project.findProperty('signingKey')
+            def signingPassword = project.findProperty('signingPassword')
+            if (signingKey) {
+                useInMemoryPgpKeys(signingKey, signingPassword)
+            }
             sign(publishing.publications["mavenJava"])
         }
 
