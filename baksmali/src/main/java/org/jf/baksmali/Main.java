@@ -88,6 +88,11 @@ public class Main extends Command {
         ExtendedCommands.addExtendedCommand(jc, new ListCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new XrefCommand(commandHierarchy));
         ExtendedCommands.addExtendedCommand(jc, new SearchCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new UnlockCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new ReplaceCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new StripDebugCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new CallGraphCommand(commandHierarchy));
+        ExtendedCommands.addExtendedCommand(jc, new PatchCommand(commandHierarchy));
 
         jc.parse(args);
 

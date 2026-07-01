@@ -200,6 +200,11 @@ java -jar baksmali.jar <子命令> [选项] <输入文件>
 | `list` | `l` | 列举对象（见下） |
 | `xref` | — | 反向交叉引用（callers/field-refs/type-refs），见 `dex-xref` |
 | `search` | `find` | 指令模式搜索（--opcode/--class/--method），见 `dex-search` |
+| `unlock` | — | 批量改访问标志（publicize/definalize），见 `dex-transform` |
+| `replace` | — | 批量替换字符串常量，见 `dex-transform` |
+| `strip-debug` | — | 清除全部调试信息，见 `dex-transform` |
+| `patch` | — | 强制方法返回定值（绕过校验），见 `dex-transform` |
+| `callgraph` | — | 导出方法级调用图（json/dot/mermaid），见 `dex-transform` |
 
 ### baksmali list 子命令
 

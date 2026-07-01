@@ -135,6 +135,18 @@ baksmali search app.apk --class 'Lcom/.*' --method onCreate          # 类/方�
 baksmali search app.apk --opcode invoke-virtual --format json
 ```
 
+### 写回变换（unlock / replace / strip-debug / patch / callgraph）
+
+这组命令**读入 dex → 变换 → 写出新 dex**（`-o` 默认 `out.dex`，原文件不改），详见 `dex-transform` skill。
+
+```bash
+baksmali unlock      app.apk -o unlocked.dex                       # 全部 public + 去 final
+baksmali replace     app.apk --from http://old --to http://new -o patched.dex   # 替换字符串常量
+baksmali strip-debug app.apk -o stripped.dex                      # 清除行号/局部变量/参数名
+baksmali patch       app.apk --method isPremium --return true -o patched.dex    # 强制方法返回定值
+baksmali callgraph   app.apk --graph-format mermaid               # 导出调用图（json/dot/mermaid）
+```
+
 ### 编辑器集成（smali lsp）
 
 `smali.jar` 内置一个 **Language Server**（LSP over stdio，JSON-RPC）。编辑器/IDE 接入后可获得
@@ -171,12 +183,13 @@ dependencies {
 
 ## Skills 索引
 
-22 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
+23 个技能位于 `.claude/skills/`，索引见 [`.claude/skills/smali-skills/SKILL.md`](.claude/skills/smali-skills/SKILL.md)。
 按能力分组：
 
 - **读取/结构**：`dex-read`、`dex-list-structure`、`dex-list-classes`、`dex-list-methods`、
   `dex-list-strings`、`dex-multidex`
 - **查询**：`dex-xref`（交叉引用）、`dex-search`（指令模式搜索）
+- **写回变换**：`dex-transform`（unlock/replace/strip-debug/patch/callgraph）
 - **编辑器**：`smali-lsp`（LSP 语言服务器：诊断/大纲/悬浮）
 - **转换**：`dex-disassemble`、`dex-assemble`、`dex-roundtrip`、`dex-build`
 - **分析**：`dex-dump`、`dex-analyze`、`dex-instructions`、`dex-classpath`、`dex-deodex`
