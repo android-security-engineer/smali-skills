@@ -1,0 +1,51 @@
+{
+  "name": "smali",
+  "scopeName": "source.smali",
+  "fileTypes": ["smali"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#directives" },
+    { "include": "#types" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#registers" }
+  ],
+  "repository": {
+    "comments": {
+      "name": "comment.line.number-sign.smali",
+      "match": "#.*$"
+    },
+    "directives": {
+      "name": "keyword.control.directive.smali",
+      "match": "^\\s*\\.[a-zA-Z][a-zA-Z0-9-]*"
+    },
+    "types": {
+      "name": "support.type.smali",
+      "match": "L[a-zA-Z][a-zA-Z0-9_/]*;|[ZBCSIJFDV]|\\[[ZBCSIJFDVL\\[]"
+    },
+    "strings": {
+      "name": "string.quoted.double.smali",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.smali",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.smali",
+      "match": "\\b0x[0-9a-fA-F]+|\\b[0-9]+\\b"
+    },
+    "keywords": {
+      "name": "keyword.operator.smali",
+      "match": "\\b(move|move-result|move-exception|return-void|return|const|const-string|const-class|monitor-enter|monitor-exit|check-cast|instance-of|array-length|new-instance|new-array|filled-new-array|fill-array-data|throw|goto|switch|packed-switch|sparse-switch|cmpl|cmpg|if-|iget|iput|sget|sput|invoke-)\\w*"
+    },
+    "registers": {
+      "name": "variable.parameter.register.smali",
+      "match": "\\b[vp]\\d+\\b"
+    }
+  }
+}

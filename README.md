@@ -1,5 +1,7 @@
 # smali-skills
 
+[![Website](https://img.shields.io/badge/website-VitePress-3c8d2c)](./website/)　[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)](#与上游的关系)
+
 smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发行版。在 JesusFreke 原版
 汇编器/反汇编器之上，补齐了**展示层与查询层**：JSON 输出、交叉引用、模式搜索、统计聚合，
 以及一整套渐进式披露的 Skills 文档。
@@ -31,6 +33,18 @@ smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发�
   `xref`、`search`、`--count`/`--group-by`，让 Agent 能直接消费结构化结果。
 - **Layer 3（Skills）**：27 个 SKILL.md，按「快速开始 / 进阶 / 专家」三层渐进披露，覆盖
   每个 CLI 能力与 dexlib2 用法，供 Agent 按需加载。
+
+## 官网
+
+本仓库在 [`website/`](./website/) 下基于 **VitePress** 提供完整文档站点（指南 / CLI / Skills，
+含 mermaid 图表与真实命令→输出示例）。
+
+```bash
+cd website
+npm install
+npm run docs:dev      # 本地预览 http://localhost:5173
+npm run docs:build    # 构建到 website/.vitepress/dist/
+```
 
 ## 安装
 
