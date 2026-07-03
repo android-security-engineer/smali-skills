@@ -1,6 +1,12 @@
 # smali-skills
 
-[![Website](https://img.shields.io/badge/website-VitePress-3c8d2c)](./website/)　[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)](#与上游的关系)
+[![Website](https://img.shields.io/badge/website-VitePress-3c8d2c)](https://android-security-engineer.github.io/smali-skills/)　[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)](#与上游的关系)　[![CI](https://github.com/android-security-engineer/smali-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/android-security-engineer/smali-skills/actions/workflows/ci.yml)
+
+**[简体中文](./README.md)** ｜ **[English](./README.en.md)**
+
+📖 **文档站 / Docs**：<https://android-security-engineer.github.io/smali-skills/>
+
+---
 
 smali/baksmali — 一个面向 **AI Agent 集成**的 smali/baksmali 增强发行版。在 JesusFreke 原版
 汇编器/反汇编器之上，补齐了**展示层与查询层**：JSON 输出、交叉引用、模式搜索、统计聚合，
